@@ -28,13 +28,38 @@ namespace Fakult1
         double Px, Py, Psq;
         double VP1x, VP1y, VN1x, VN1y;
 
+        double Vsr, Lsr, nsr, V2sr;
+        double dV = 5;
+        int[] DistrV = new int[500];
+        int Nans;
+        int Time = 1000;
         private void посмотретьToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FF2 = new Form2();
             FF2.Visible = true;
             button1.Enabled = false;
             посмотретьToolStripMenuItem.Enabled = false;
-            
+            Vsr = 0; Lsr = 0; nsr = 0; V2sr = 0;
+            for (int i = 0; i<N; i++)
+            {
+                Vsr += CS[i];
+                Lsr += CS[i] / (double)(CN[i] + 1);
+                nsr += (double)CN[i];
+                V2sr += Vx[i] * Vx[i] + Vy[i] * Vy[i];
+            }
+            Vsr /= N * T * dt;
+            Lsr /= N;
+            nsr /= N * T * dt;
+            V2sr /= N;
+            FF2.textBox1.Text = Convert.ToString(Vsr);
+            FF2.textBox2.Text = Convert.ToString(Lsr);
+            FF2.textBox3.Text = Convert.ToString(nsr);
+            FF2.dataGridView1.RowCount = 500;
+            for (int i =0; i<500; i++)
+            {
+                FF2.dataGridView1[0, i].Value = string.Format("[ {0:f2}; {1:f2})", i+dV, (i+1)*dV);//2 знака после запятой, string.Format похож на Convert.ToString
+                FF2.dataGridView1[1, i].Value = DistrV[i];
+            }
         }
 
         private void выходToolStripMenuItem_Click(object sender, EventArgs e)
@@ -65,14 +90,11 @@ namespace Fakult1
             
 
         }
-        public void Calc()
-        {
-
-        }
+        
         private void Button1_Click(object sender, EventArgs e)
         {
 
-            T = 0;
+            T = 0; Nans = 0;
             N = Convert.ToInt32(textBox1.Text);                      //int.Parse
             R = Convert.ToDouble(textBox2.Text);
             Vmax = Convert.ToDouble(textBox3.Text);
@@ -86,6 +108,7 @@ namespace Fakult1
             Gr1.DrawRectangle(P2, (int)(Bmp1.Width / 2 - K * Xmax), (int)(Bmp1.Height / 2 - K * Ymax),
                 (int)(2 * K * Xmax), (int)(2 * K * Ymax));
             Gr2.DrawImage(Bmp1, 0, 0);
+
             for (int i=0; i<N; i++)
             {
                 CS[i] = 0; CN[i] = 0;
@@ -93,6 +116,10 @@ namespace Fakult1
                 Y[i] = (2 * Rnd.NextDouble() - 1) * (Ymax - R);
                 Vx[i] = (2 * Rnd.NextDouble() - 1) * Vmax;
                 Vy[i] = (2 * Rnd.NextDouble() - 1) * Vmax;
+            }
+            for (int i = 0; i<500; i++)
+            {
+                DistrV[i] = 0;
             }
             for (int i=0; i<N; i++)
             {
@@ -121,12 +148,7 @@ namespace Fakult1
                 Y[i] += Vy[i] * dt;
 
                 CS[i] += Math.Sqrt(Vx[i] * Vx[i] + Vy[i] * Vy[i]) * dt;
-                /*
-                <V> = sum(CS[i])/(N*T*dt)
-                <l> = sum(CS[i]/(CN[i]+1))/N
-                <n> = sum(CN[i])/(N*T*dt)
-                <V2> = sum(V[i]*V[i])/N
-                */
+                
                 if (((X[i] >= Xmax - R) && (Vx[i] > 0)) || ((X[i] <= -Xmax + R) && (Vx[i] < 0))) Vx[i] = -Vx[i];
                 
                 if (((Y[i] >= Ymax - R) && (Vy[i] > 0)) || ((Y[i] <= -Ymax + R) && (Vy[i] < 0))) Vy[i] = -Vy[i];
@@ -165,6 +187,15 @@ namespace Fakult1
 
                 }
             }
+            if (T % Time == 0)
+            {
+                Nans++;
+                for (int i = 0; i < N - 1; i++)
+                {
+                    int index = (int)(Math.Sqrt(Vx[i] * Vx[i] + Vy[i] * Vy[i]) / dV);
+                    DistrV[index]++;
+                }
+            }
 
             Gr2.DrawImage(Bmp1, 0, 0);
             for (int i = 0; i < N; i++)
@@ -190,9 +221,6 @@ namespace Fakult1
         {
             Application.Exit();
         }
-        public void Draw()
-        {
-
-        }
+        
     }
 }
