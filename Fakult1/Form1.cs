@@ -57,7 +57,7 @@ namespace Fakult1
             FF2.dataGridView1.RowCount = 500;
             for (int i =0; i<500; i++)
             {
-                FF2.dataGridView1[0, i].Value = string.Format("[ {0:f2}; {1:f2})", i+dV, (i+1)*dV);//2 знака после запятой, string.Format похож на Convert.ToString
+                FF2.dataGridView1[0, i].Value = string.Format("[ {0:f2}; {1:f2})", i*dV, (i+1)*dV);//2 знака после запятой, string.Format похож на Convert.ToString
                 FF2.dataGridView1[1, i].Value = DistrV[i];
             }
         }
