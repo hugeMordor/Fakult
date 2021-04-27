@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 
 namespace Fakult1
 {
@@ -31,8 +32,138 @@ namespace Fakult1
         double Vsr, Lsr, nsr, V2sr;
         double dV = 5;
         int[] DistrV = new int[500];
+
         int Nans;
         int Time = 1000;
+
+        double VP2x, VP2y, VN2x, VN2y;
+
+        int T;
+        double[] CS; int[] CN;
+
+        bool NewModel = true;
+
+        FileStream f;
+        BinaryWriter DataIn;
+        BinaryReader DataOut;
+
+        private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
+        {
+            f = new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read);
+            DataOut = new BinaryReader(f);
+            N = DataOut.ReadInt32(); R = DataOut.ReadDouble(); Vmax = DataOut.ReadDouble();
+            Xmax = DataOut.ReadDouble(); Ymax = DataOut.ReadDouble(); dt = DataOut.ReadDouble();
+            K = DataOut.ReadDouble();
+            X = new double[N]; Y = new double[N]; CS = new double[N];
+            Vx = new double[N]; Vy = new double[N]; CN = new int[N];
+            for (int i = 0; i < N; i++)
+            {
+                X[i] = DataOut.ReadDouble();
+            }
+            for (int i = 0; i < N; i++)
+            {
+                Y[i] = DataOut.ReadDouble();
+            }
+            for (int i = 0; i < N; i++)
+            {
+                Vx[i] = DataOut.ReadDouble();
+            }
+            for (int i = 0; i < N; i++)
+            {
+                Vy[i] = DataOut.ReadDouble();
+            }
+            T = DataOut.ReadInt32();
+            for (int i = 0; i < N; i++)
+            {
+                CS[i] = DataOut.ReadDouble();
+            }
+            for (int i = 0; i < N; i++)
+            {
+                CN[i] = DataOut.ReadInt32();
+            }
+            Nans = DataOut.ReadInt32();
+            for (int i = 0; i < N; i++)
+            {
+                DistrV[i] = DataOut.ReadInt32();
+            }
+            DataOut.Close();
+            NewModel = false;
+            textBox1.Text = Convert.ToString(N);
+            textBox2.Text = Convert.ToString(R);
+            textBox3.Text = Convert.ToString(Vmax);
+            textBox4.Text = Convert.ToString(Xmax);
+            textBox5.Text = Convert.ToString(Ymax);
+            textBox6.Text = Convert.ToString(dt);
+            textBox7.Text = Convert.ToString(K);
+            textBox8.Text = Convert.ToString(T*dt);
+            Gr1.Clear(pictureBox1.BackColor);
+            Gr1.DrawRectangle(P2, (int)(Bmp1.Width / 2 - K * Xmax), (int)(Bmp1.Height / 2 - K * Ymax),
+                (int)(2 * K * Xmax), (int)(2 * K * Ymax));
+            Gr2.DrawImage(Bmp1, 0, 0);
+            for (int i = 0; i < N; i++)
+            {
+                Gr2.DrawEllipse(P1, (int)(Bmp1.Width / 2 + K * (X[i] - R)),
+                    (int)(Bmp1.Height / 2 - K * (Y[i] + R)), (int)(2 * K * R), (int)(2 * K * R));
+                Gr2.FillEllipse(Br, (int)(Bmp1.Width / 2 + K * (X[i] - R)),
+                    (int)(Bmp1.Height / 2 - K * (Y[i] + R)), (int)(2 * K * R), (int)(2 * K * R));
+            }
+            pictureBox1.Image = Bmp2;
+        }
+
+        private void открытьToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.ShowDialog();
+        }
+
+        
+
+        private void сохранитьToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            saveFileDialog1.ShowDialog();
+        }
+
+        private void saveFileDialog1_FileOk(object sender, CancelEventArgs e)
+        {
+            f = new FileStream(saveFileDialog1.FileName, FileMode.Create, FileAccess.Write);
+            DataIn = new BinaryWriter(f);
+            DataIn.Write(N); DataIn.Write(R); DataIn.Write(Vmax);
+            DataIn.Write(Xmax); DataIn.Write(Ymax); DataIn.Write(dt);
+            DataIn.Write(K);
+            
+            for (int i = 0; i < N; i++)
+            {
+                DataIn.Write(X[i]);
+            }
+            for (int i = 0; i < N; i++)
+            {
+                DataIn.Write(Y[i]);
+            }
+            for (int i = 0; i < N; i++)
+            {
+                DataIn.Write(Vx[i]);
+            }
+            for (int i = 0; i < N; i++)
+            {
+                DataIn.Write(Vy[i]);
+            }
+            DataIn.Write(T);
+            for (int i = 0; i < N; i++)
+            {
+                DataIn.Write(CS[i]);
+            }
+            for (int i = 0; i < N; i++)
+            {
+                DataIn.Write(CN[i]);
+            }
+            DataIn.Write(Nans);
+            for (int i = 0; i < 500; i++)
+            {
+                DataIn.Write(DistrV[i]);
+            }
+            DataIn.Close();
+        }
+
+        
         private void посмотретьToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FF2 = new Form2();
@@ -67,10 +198,7 @@ namespace Fakult1
             Application.Exit();
         }
 
-        double VP2x, VP2y, VN2x, VN2y;
-
-        int T;
-        double[] CS; int[] CN;//Счетчики времени, пути и столкновений
+        //Счетчики времени, пути и столкновений
 
         // Xscr = (int)(Bmp1.Width/2 + K*x)
         // Yscr = (int)(Bmp1.Height/2 - K*y)
@@ -90,51 +218,55 @@ namespace Fakult1
             
 
         }
-        
+
         private void Button1_Click(object sender, EventArgs e)
         {
-
-            T = 0; Nans = 0;
-            N = Convert.ToInt32(textBox1.Text);                      //int.Parse
-            R = Convert.ToDouble(textBox2.Text);
-            Vmax = Convert.ToDouble(textBox3.Text);
-            Xmax = Convert.ToDouble(textBox4.Text)/2;
-            Ymax = Convert.ToDouble(textBox5.Text)/2;
-            dt = Convert.ToDouble(textBox6.Text);
-            K = Convert.ToDouble(textBox7.Text);
-            X = new double[N]; Y = new double[N]; CS = new double[N];
-            Vx = new double[N]; Vy = new double[N]; CN = new int[N];
-            Gr1.Clear(pictureBox1.BackColor); Gr2.Clear(pictureBox1.BackColor);
-            Gr1.DrawRectangle(P2, (int)(Bmp1.Width / 2 - K * Xmax), (int)(Bmp1.Height / 2 - K * Ymax),
-                (int)(2 * K * Xmax), (int)(2 * K * Ymax));
-            Gr2.DrawImage(Bmp1, 0, 0);
-
-            for (int i=0; i<N; i++)
+            if (NewModel)
             {
-                CS[i] = 0; CN[i] = 0;
-                X[i] = (2 * Rnd.NextDouble() - 1) * (Xmax - R);
-                Y[i] = (2 * Rnd.NextDouble() - 1) * (Ymax - R);
-                Vx[i] = (2 * Rnd.NextDouble() - 1) * Vmax;
-                Vy[i] = (2 * Rnd.NextDouble() - 1) * Vmax;
+                T = 0; Nans = 0;
+                N = Convert.ToInt32(textBox1.Text);                      //int.Parse
+                R = Convert.ToDouble(textBox2.Text);
+                Vmax = Convert.ToDouble(textBox3.Text);
+                Xmax = Convert.ToDouble(textBox4.Text) / 2;
+                Ymax = Convert.ToDouble(textBox5.Text) / 2;
+                dt = Convert.ToDouble(textBox6.Text);
+                K = Convert.ToDouble(textBox7.Text);
+                X = new double[N]; Y = new double[N]; CS = new double[N];
+                Vx = new double[N]; Vy = new double[N]; CN = new int[N];
+
+                Gr1.Clear(pictureBox1.BackColor);
+                Gr1.DrawRectangle(P2, (int)(Bmp1.Width / 2 - K * Xmax), (int)(Bmp1.Height / 2 - K * Ymax),
+                    (int)(2 * K * Xmax), (int)(2 * K * Ymax));
+                Gr2.DrawImage(Bmp1, 0, 0);
+
+                for (int i = 0; i < N; i++)
+                {
+                    CS[i] = 0; CN[i] = 0;
+                    X[i] = (2 * Rnd.NextDouble() - 1) * (Xmax - R);
+                    Y[i] = (2 * Rnd.NextDouble() - 1) * (Ymax - R);
+                    Vx[i] = (2 * Rnd.NextDouble() - 1) * Vmax;
+                    Vy[i] = (2 * Rnd.NextDouble() - 1) * Vmax;
+                }
+                for (int i = 0; i < 500; i++)
+                {
+                    DistrV[i] = 0;
+                }
+                for (int i = 0; i < N; i++)
+                {
+                    Gr2.DrawEllipse(P1, (int)(Bmp1.Width / 2 + K * (X[i] - R)),
+                        (int)(Bmp1.Height / 2 - K * (Y[i] + R)), (int)(2 * K * R), (int)(2 * K * R));
+                    Gr2.FillEllipse(Br, (int)(Bmp1.Width / 2 + K * (X[i] - R)),
+                        (int)(Bmp1.Height / 2 - K * (Y[i] + R)), (int)(2 * K * R), (int)(2 * K * R));
+                }
+                pictureBox1.Image = Bmp2;
+                NewModel = false;
             }
-            for (int i = 0; i<500; i++)
-            {
-                DistrV[i] = 0;
-            }
-            for (int i=0; i<N; i++)
-            {
-                Gr2.DrawEllipse(P1, (int)(Bmp1.Width / 2 + K * (X[i] - R)), 
-                    (int)(Bmp1.Height / 2 - K * (Y[i] + R)), (int)(2*K*R), (int)(2*K*R));
-                Gr2.FillEllipse(Br, (int)(Bmp1.Width / 2 + K * (X[i] - R)),
-                    (int)(Bmp1.Height / 2 - K * (Y[i] + R)), (int)(2 * K * R), (int)(2 * K * R));
-            }  
-            pictureBox1.Image = Bmp2;
-
+            сохранитьToolStripMenuItem.Enabled = false;
             посмотретьToolStripMenuItem.Enabled = false;
             button1.Enabled = false;
             button2.Enabled = true;
             timer1.Enabled = true;
-            
+
 
         }
         private void Timer1_Tick(object sender, EventArgs e)
@@ -212,6 +344,7 @@ namespace Fakult1
         }
         private void Button2_Click(object sender, EventArgs e)
         {
+            сохранитьToolStripMenuItem.Enabled = true;
             посмотретьToolStripMenuItem.Enabled = true;
             button1.Enabled = true;
             button2.Enabled = false;
