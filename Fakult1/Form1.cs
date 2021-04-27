@@ -17,7 +17,7 @@ namespace Fakult1
         public static Form1 FF1;
         public static Form2 FF2;
         public int N;
-        public double R, Vmax, Xmax, Ymax, dt, K;
+        public double R, Vmax, Xmax, Ymax, dt, K; int VverIndex;
         double[] X; double[] Y; double[] Vx; double[] Vy;
         Random Rnd = new Random();
         Bitmap Bmp1, Bmp2;
@@ -179,15 +179,17 @@ namespace Fakult1
                 nsr += (double)CN[i];
                 V2sr += Vx[i] * Vx[i] + Vy[i] * Vy[i];
             }
+            VverIndex = Array.IndexOf(DistrV, DistrV.Max());
             Vsr /= N * T * dt;
             Lsr /= N;
             nsr /= N * T * dt;
-            V2sr = V2sr/N;
+            V2sr /= N;
             FF2 = new Form2();
             FF2.Visible = true;
             FF2.textBox1.Text = Convert.ToString(Vsr);
             FF2.textBox2.Text = Convert.ToString(Lsr);
             FF2.textBox3.Text = Convert.ToString(nsr);
+            FF2.textBox4.Text = string.Format("[ {0:f2}; {1:f2})", VverIndex * dV, (VverIndex + 1) * dV);
             FF2.dataGridView1.RowCount = 500;
             for (int i =0; i<500; i++)
             {
