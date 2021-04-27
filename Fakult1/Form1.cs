@@ -16,8 +16,8 @@ namespace Fakult1
     {
         public static Form1 FF1;
         public static Form2 FF2;
-        int N;
-        double R, Vmax, Xmax, Ymax, dt, K;
+        public int N;
+        public double R, Vmax, Xmax, Ymax, dt, K;
         double[] X; double[] Y; double[] Vx; double[] Vy;
         Random Rnd = new Random();
         Bitmap Bmp1, Bmp2;
@@ -30,10 +30,10 @@ namespace Fakult1
         double VP1x, VP1y, VN1x, VN1y;
 
         double Vsr, Lsr, nsr, V2sr;
-        double dV = 5;
-        int[] DistrV = new int[500];
+        public double dV = 5;
+        public int[] DistrV = new int[500];
 
-        int Nans;
+        public int Nans;
         int Time = 1000;
 
         double VP2x, VP2y, VN2x, VN2y;
