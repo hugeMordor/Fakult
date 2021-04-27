@@ -27,7 +27,7 @@ namespace Fakult1
             Draw();
         }
 
-        Pen P2 = new Pen(Color.Black, 2);
+        Pen P2 = new Pen(Color.Red, 2);
         SolidBrush Br = new SolidBrush(Color.Black);
         public Form2()
         {
@@ -61,11 +61,20 @@ namespace Fakult1
                 Gr.FillRectangle(Br, (int)(Kh * i * Form1.FF1.dV),
                     (int)(Bmp.Height - Kv * Form1.FF1.DistrV[i] / (Form1.FF1.N * Form1.FF1.Nans)),
                     (int)(Kh * Form1.FF1.dV), (int)(Kv * Form1.FF1.DistrV[i] / (Form1.FF1.N * Form1.FF1.Nans)));
+                
             }
-            
-
-
-
+            //Формулы в файле Сабутя
+            X1scr = 0; Y1scr = Bmp.Height;
+            for(int i = 1; i <= Bmp.Width; i++)
+            {
+                X2scr = i;
+                X = X2scr / Kh;
+                
+                Y = Form1.FF1.dV*2 * X * Math.Exp(-X * X / Form1.V2sr) / Form1.V2sr;
+                Y2scr = (int)(Bmp.Height - Kv * Y);
+                Gr.DrawLine(P2, X1scr, Y1scr, X2scr, Y2scr);
+                X1scr = X2scr;Y1scr = Y2scr;
+            }
             pictureBox1.Image = Bmp;
         }
     }

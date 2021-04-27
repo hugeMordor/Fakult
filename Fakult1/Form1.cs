@@ -29,7 +29,8 @@ namespace Fakult1
         double Px, Py, Psq;
         double VP1x, VP1y, VN1x, VN1y;
 
-        double Vsr, Lsr, nsr, V2sr;
+        double Vsr, Lsr, nsr;
+        public static double V2sr;
         public double dV = 5;
         public int[] DistrV = new int[500];
 
@@ -87,7 +88,7 @@ namespace Fakult1
                 DistrV[i] = DataOut.ReadInt32();
             }
             DataOut.Close();
-            NewModel = false;
+            NewModel = false; посмотретьToolStripMenuItem.Enabled = true;
             textBox1.Text = Convert.ToString(N);
             textBox2.Text = Convert.ToString(R);
             textBox3.Text = Convert.ToString(Vmax);
@@ -108,6 +109,7 @@ namespace Fakult1
                     (int)(Bmp1.Height / 2 - K * (Y[i] + R)), (int)(2 * K * R), (int)(2 * K * R));
             }
             pictureBox1.Image = Bmp2;
+            
         }
 
         private void открытьToolStripMenuItem_Click(object sender, EventArgs e)
@@ -166,8 +168,7 @@ namespace Fakult1
         
         private void посмотретьToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            FF2 = new Form2();
-            FF2.Visible = true;
+            
             button1.Enabled = false;
             посмотретьToolStripMenuItem.Enabled = false;
             Vsr = 0; Lsr = 0; nsr = 0; V2sr = 0;
@@ -181,7 +182,9 @@ namespace Fakult1
             Vsr /= N * T * dt;
             Lsr /= N;
             nsr /= N * T * dt;
-            V2sr /= N;
+            V2sr = V2sr/N;
+            FF2 = new Form2();
+            FF2.Visible = true;
             FF2.textBox1.Text = Convert.ToString(Vsr);
             FF2.textBox2.Text = Convert.ToString(Lsr);
             FF2.textBox3.Text = Convert.ToString(nsr);
